@@ -1,0 +1,182 @@
+{
+    "swagger": "2.0",
+    "info": {
+      "description": "Comment Api",
+      "version": "1.0.0",
+      "title": "Comment API"
+    },
+    "basePath": "/comment-api",
+    "host": "localhost:3000",
+    "consumes": [
+      "application/json"
+    ],
+    "produces": [
+      "application/json"
+    ],
+    "tags": [
+      {
+        "name": "comment",
+        "description": "comments entity"
+      }
+    ],
+    "schemes": [
+      "http",
+      "https"
+    ],
+    "definitions": {
+        "CommentInput": {
+          "type": "object",
+          "properties": {
+            "type": {
+                "type": "string",
+                "enum": ["Proposal", "Inquiry", "Reply"]
+            },
+            "ancestorsId": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                },
+                "default": []
+            },
+            "superAncestorId": {
+                "type": "string",
+                "description": "Id of Node without ancestors"
+            },
+            "content": {
+                "type": "string"
+            }
+          },
+          "required": ["type", "content"]
+        },
+        "CommentCreationResponse": {
+          "type": "object",
+          "properties": {
+            "type": {
+                "type": "string",
+                "enum": ["Proposal", "Question", "Reply"]
+            },
+            "superAncestorId": {
+                "type": "string",
+                "description": "Id of Node without ancestors"
+            },
+            "content": {
+                "type": "string"
+            }
+          }
+        },
+        "Comment": {
+            "type": "object",
+            "properties": {
+                "nodeId": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": ["Proposal", "Question", "Reply"]
+                },
+                "children": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Comment"
+                    }
+                },
+                "superNodeId": {
+                    "type": "string",
+                    "description": "Id of Node without ancestors"
+                },
+                "content": {
+                    "type": "string"
+                }
+            } 
+        },
+        "Error": {
+          "description": "Generic HTTP error response",
+          "properties": {
+            "error": {
+              "description": "HTTP status message",
+              "type": "string"
+            },
+            "message": {
+              "description": "Further error details",
+              "type": "string"
+            },
+            "statusCode": {
+              "description": "HTTP status code",
+              "type": "integer"
+            },
+            "errorDetails": {
+              "type": "array",
+              "description": "A non-mandatory field that can be use to add custom information",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+    },
+    "paths": {
+        "/comment": {
+            "post": {
+                "tags": [
+                  "comment"
+                ],
+                "summary": "Create a comment",
+                "description": "",
+                "parameters": [
+                  {
+                    "in": "body",
+                    "name": "body",
+                    "schema": {
+                        "$ref": "#/definitions/CommentInput"
+                    }
+                  }
+                ],
+                "responses": {
+                  "200": {
+                    "description": "Successful operation",
+                    "schema": {
+                      "$ref":"#/definitions/CommentCreationResponse"
+                    }
+                  },
+                  "400": {
+                    "description": "Bad Request",
+                    "schema": {
+                      "$ref": "#/definitions/Error"
+                    }
+                  } 
+                }
+            }
+        },
+      "/comment/{commentId}/graph": {
+        "get": {
+          "tags": [
+            "comment"
+          ],
+          "summary": "Get a comment graph",
+          "description": "",
+          "parameters": [
+            {
+              "in": "path",
+              "name": "commentId",
+              "type": "string",
+              "description": "it should be a Node element without ancestors"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "schema": {
+                "$ref":"#/definitions/Comment"
+              }
+            },
+            "400": {
+              "description": "Bad Request",
+              "schema": {
+                "$ref": "#/definitions/Error"
+              }
+            } 
+          }
+        }
+      }
+    }
+  }
