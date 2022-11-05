@@ -3,6 +3,7 @@ const swaggerUi = require('swagger-ui-express')
 const express = require('express')
 const path = require('path')
 
+const errorMiddleware = require('./middlewares/error-middleware')
 const commentController = require('./controllers/comment-controller')
 const db = require('./services/db-service')
 
@@ -22,6 +23,11 @@ module.exports = new Promise((resolve, reject) => {
     if (err) {
       reject(err)
     }
+
+    app.use((req, res, next) => {
+      req.log = require('./bootstrap/logger')
+      next()
+    })
 
     // Injecting Swagger middlewares
     app.use(
@@ -48,6 +54,9 @@ module.exports = new Promise((resolve, reject) => {
     commentController({ router, services: { dbService } })
 
     app.use(basePATH, router)
+
+    // global error handler
+    app.use(errorMiddleware)
 
     resolve(app)
   })
